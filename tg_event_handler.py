@@ -42,6 +42,10 @@ async def tg_channel_data(channel_id):
     photo = BytesIO()
     participants = await client.get_participants(int(channel_id), limit=0)
     await client.download_profile_photo(int(channel_id), file=photo)
+    if photo.getbuffer().nbytes:
+        photo = photo.getvalue()
+    else:
+        photo = None
     subs_count = participants.total
     return name, username, subs_count, photo
 
@@ -170,11 +174,8 @@ def add_stream_viewers(stream_id):
     """
     key = 'stream:{}'.format(stream_id)
     if not redis_con.hgetall(key):
-        value = {
-            'current_viewers': 0,
-            'max_viewers': 0
-        }
-        redis_con.hmset(key, value)
+        redis_con.hset(key, 'current_viewers', 0)
+        redis_con.hset(key, 'max_viewers', 0)
 
 
 def update_viewers_count(stream_id, incr_val):
@@ -224,7 +225,7 @@ async def handler(update):
             channel_id = str(update.get('chat_id'))
             if not get_channel_info(channel_id):
                 name, username, subscribers, photo = await tg_channel_data(int(channel_id))
-                add_channel_info(channel_id, name, username, subscribers, photo.getvalue())
+                add_channel_info(channel_id, name, username, subscribers, photo)
 
         # Обработка ивентов со стримами
         if update.get('_') == 'UpdateGroupCall':
@@ -283,3 +284,12 @@ async def handler(update):
 client.add_event_handler(handler)
 client.start()
 client.run_until_disconnected()
+
+# async def main():
+#     photo = BytesIO()
+#     await client.download_profile_photo('goshkalp_test', file=photo)
+#     print(photo.getbuffer().nbytes)
+#
+# with client:
+#     client.loop.run_until_complete(main())
+
