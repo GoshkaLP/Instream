@@ -7,6 +7,7 @@ from contextlib import contextmanager
 
 Session = sessionmaker(SQL_ENGINE, expire_on_commit=False)
 
+
 @contextmanager
 def session_scope():
     """Provide a transactional scope around a series of operations."""

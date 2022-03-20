@@ -131,3 +131,4 @@ dmypy.json
 # custom files
 .idea/
 /data/*
+anon.session
