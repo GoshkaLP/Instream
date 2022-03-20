@@ -58,7 +58,7 @@ class CurrentStreams(Base):
 
 
 class FinishedStreams(Base):
-    __tablename__ = 'announcedstreams'
+    __tablename__ = 'finishedstreams'
     __table_args__ = {'extend_existing': True}
 
     id = Column(String, primary_key=True, nullable=False)
