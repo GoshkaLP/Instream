@@ -1,9 +1,16 @@
+from sqlalchemy import update, delete
+from sqlalchemy.orm import sessionmaker
+
+from contextlib import contextmanager
+
 import os
 from sqlalchemy import create_engine
+
 
 # Для отладки
 from dotenv import load_dotenv
 load_dotenv()
+
 
 # Конфиг с информацией об IP адресе сервера, на котором работает проект с созданием подключения к PSQL базе данных
 POSTGRES_HOST = os.getenv('HOST')
@@ -18,3 +25,22 @@ SQL_ENGINE = create_engine("postgresql://{user}:{password}@{host}:5433/{db}".for
     db=POSTGRES_DB
 ),
     pool_recycle=3600)
+
+
+Session = sessionmaker(SQL_ENGINE, expire_on_commit=False)
+
+
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+

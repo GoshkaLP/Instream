@@ -6,27 +6,6 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-# class BaseFuncs(object):
-#     @classmethod
-#     def insert(cls, **kw):
-#         obj = cls(**kw)
-#         try:
-#             db.session.add(obj)
-#             db.session.commit()
-#             return obj
-#         except Exception as e:
-#             db.session.rollback()
-#             raise e
-#
-#     def update(self, **kw):
-#         for key, value in kw.items():
-#             setattr(self, key, value)
-#         try:
-#             db.session.commit()
-#         except Exception as e:
-#             db.session.rollback()
-#             raise e
-
 class Channels(Base):
     __tablename__ = 'channels'
     __table_args__ = {'extend_existing': True}

@@ -5,10 +5,13 @@ from io import BytesIO
 from datetime import datetime
 from dateutil import tz
 
-from dbhelper import session_scope
-from models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams
+# from dbhelper import session_scope
+# from models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams
+#
+# from redishelper import redis_con
 
-from redishelper import redis_con
+from app.views.extensions.models import session_scope, Channels, AnnouncedStreams, CurrentStreams, FinishedStreams,\
+    redis_con
 
 import os
 
@@ -282,8 +285,8 @@ async def handler(update):
 
 
 client.add_event_handler(handler)
-client.start()
-client.run_until_disconnected()
+# client.start()
+# client.run_until_disconnected()
 
 # async def main():
 #     photo = BytesIO()
