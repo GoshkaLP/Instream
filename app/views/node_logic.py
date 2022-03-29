@@ -1,4 +1,5 @@
-from app.views.extensions.models.models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams
+from app.views.extensions.models.models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams, \
+    SuggestedChannels, Bugs
 from app.views.extensions.models.dbhelper import session_scope
 
 from sqlalchemy import desc
@@ -71,3 +72,35 @@ def get_current_streams():
         return {
             'currentStreams': resp_data
         }
+
+
+def add_suggested_channel(form):
+    if form:
+        username = form.get('username')
+        information = form.get('information')
+        if username:
+            new_suggested_channel = SuggestedChannels(
+                username=username,
+                information=information
+            )
+            with session_scope() as session:
+                session.add(new_suggested_channel)
+            return {'status': 'ok'}
+        return {'status': 'Empty required fields'}
+    return {'status': 'Empty form'}
+
+
+def add_bug(form):
+    if form:
+        username = form.get('username')
+        information = form.get('information')
+        if username and information:
+            new_bug = Bugs(
+                username=username,
+                information=information
+            )
+            with session_scope() as session:
+                session.add(new_bug)
+            return {'status': 'ok'}
+        return {'status': 'Empty required fields'}
+    return {'status': 'Empty form'}

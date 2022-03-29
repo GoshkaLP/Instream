@@ -54,21 +54,6 @@ async def tg_channel_data(channel_id):
 
 
 # Методы для работы с базой данных
-def add_channel_info(channel_id, name, username, subs_count, photo):
-    """
-    Метод для добавления информации о канале в базу данных
-    """
-    new_channel = Channels(
-        id=channel_id,
-        name=name,
-        username=username,
-        subscribers=subs_count,
-        photo=photo
-    )
-    with session_scope() as session:
-        session.add(new_channel)
-
-
 def get_channel_info(channel_id):
     """
     Метод для получения информации о канале из базы данных
@@ -76,6 +61,22 @@ def get_channel_info(channel_id):
     with session_scope() as session:
         res = session.query(Channels).filter_by(id=channel_id).first()
         return res
+
+
+def add_channel_info(channel_id, name, username, subs_count, photo):
+    """
+    Метод для добавления информации о канале в базу данных
+    """
+    with session_scope() as session:
+        if not get_channel_info(channel_id):
+            new_channel = Channels(
+                id=channel_id,
+                name=name,
+                username=username,
+                subscribers=subs_count,
+                photo=photo
+            )
+            session.add(new_channel)
 
 
 def get_scheduled_stream(stream_id):
@@ -226,9 +227,8 @@ async def handler(update):
         stream_id = str(call.get('id'))
         if update.get('chat_id'):
             channel_id = str(update.get('chat_id'))
-            if not get_channel_info(channel_id):
-                name, username, subscribers, photo = await tg_channel_data(int(channel_id))
-                add_channel_info(channel_id, name, username, subscribers, photo)
+            name, username, subscribers, photo = await tg_channel_data(int(channel_id))
+            add_channel_info(channel_id, name, username, subscribers, photo)
 
         # Обработка ивентов со стримами
         if update.get('_') == 'UpdateGroupCall':
@@ -241,21 +241,22 @@ async def handler(update):
                 # если же трансляция не была запланированной, то перемещаем трансляцию в заверешенную и записываем
                 # кол-во зрителей, длительность и дату окончания
                 else:
-                    duration = call.get('duration')
-                    watchers_count = get_max_viewers_count(stream_id)
-                    end_date = datetime.now(tz=from_zone)
-                    started_stream = get_started_stream(stream_id)
-                    delete_started_stream(stream_id)
-                    add_finished_stream(
-                        channel_id=channel_id,
-                        stream_id=stream_id,
-                        start_date=started_stream.start_date,
-                        end_date=end_date,
-                        duration=duration,
-                        watchers=watchers_count,
-                        scheduled=started_stream.scheduled
-                    )
-                    delete_stream_viewers(stream_id)
+                    if get_started_stream(stream_id):
+                        duration = call.get('duration')
+                        watchers_count = get_max_viewers_count(stream_id)
+                        end_date = datetime.now(tz=from_zone)
+                        started_stream = get_started_stream(stream_id)
+                        delete_started_stream(stream_id)
+                        add_finished_stream(
+                            channel_id=channel_id,
+                            stream_id=stream_id,
+                            start_date=started_stream.start_date,
+                            end_date=end_date,
+                            duration=duration,
+                            watchers=watchers_count,
+                            scheduled=started_stream.scheduled
+                        )
+                        delete_stream_viewers(stream_id)
 
             # Если трансляция запланированная
             elif call.get('schedule_date'):
@@ -277,11 +278,12 @@ async def handler(update):
 
         # Обработка ивентов с участниками стрима
         elif update.get('_') == 'UpdateGroupCallParticipants':
-            participant = update.get('participants')[0]
-            if participant.get('just_joined'):
-                update_viewers_count(stream_id, 1)
-            elif participant.get('left'):
-                update_viewers_count(stream_id, -1)
+            if get_started_stream(stream_id):
+                participant = update.get('participants')[0]
+                if participant.get('just_joined'):
+                    update_viewers_count(stream_id, 1)
+                elif participant.get('left'):
+                    update_viewers_count(stream_id, -1)
 
 
 client.add_event_handler(handler)

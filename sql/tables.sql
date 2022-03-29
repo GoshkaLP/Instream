@@ -43,3 +43,21 @@ CREATE TABLE FinishedStreams (
     PRIMARY KEY (id),
     FOREIGN KEY (channel_id) REFERENCES Channels (id)
 );
+
+CREATE TABLE SuggestedChannels (
+    id          SERIAL,
+    username    VARCHAR(32) NOT NULL,
+    information VARCHAR(255),
+    status      BOOLEAN DEFAULT FALSE,
+
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE Bugs (
+    id          SERIAL,
+    username    VARCHAR(32) NOT NULL,
+    information VARCHAR(255) NOT NULL ,
+    status      BOOLEAN DEFAULT FALSE,
+
+    PRIMARY KEY (id)
+);
