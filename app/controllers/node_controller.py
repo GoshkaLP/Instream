@@ -5,6 +5,16 @@ from db import session_scope
 
 from sqlalchemy import desc
 
+from io import BytesIO
+
+from flask import send_file
+
+from os import getenv
+
+# Для отладки
+# from dotenv import load_dotenv
+# load_dotenv()
+
 
 def get_last_finished():
     """
@@ -20,7 +30,10 @@ def get_last_finished():
             resp_data.append({
                 'streamId': stream.id,
                 'channelId': stream.channel_id,
-                'channelUrl': 't.me/{}'.format(channel.username),
+                'channelUrl': 'https://t.me/{}'.format(channel.username),
+                'name': channel.username,
+                'followersCount': channel.subscribers,
+                'image': 'https://{}/api/photo/{}'.format(getenv('DOMAIN'), stream.channel_id),
                 'startDate': stream.start_date,
                 'endDate': stream.end_date,
                 'viewersCount': stream.viewers_count,
@@ -45,7 +58,10 @@ def get_announced_streams():
             resp_data.append({
                 'streamId': stream.id,
                 'channelId': stream.channel_id,
-                'channelUrl': 't.me/{}'.format(channel.username),
+                'channelUrl': 'https://t.me/{}'.format(channel.username),
+                'name': channel.username,
+                'followersCount': channel.subscribers,
+                'image': 'https://{}/api/photo/{}'.format(getenv('DOMAIN'), stream.channel_id),
                 'scheduledDate': stream.scheduled_date
             })
         return {
@@ -66,7 +82,10 @@ def get_current_streams():
             resp_data.append({
                 'streamId': stream.id,
                 'channelId': stream.channel_id,
-                'channelUrl': 't.me/{}'.format(channel.username),
+                'channelUrl': 'https://t.me/{}'.format(channel.username),
+                'name': channel.username,
+                'followersCount': channel.subscribers,
+                'image': 'https://{}/api/photo/{}'.format(getenv('DOMAIN'), stream.channel_id),
                 'startDate': stream.start_date,
                 'scheduled': stream.scheduled
             })
@@ -76,6 +95,9 @@ def get_current_streams():
 
 
 def add_suggested_channel(form):
+    """
+    Мето для добавления в базу предложенного канала
+    """
     if form:
         username = form.get('username')
         information = form.get('information')
@@ -92,6 +114,9 @@ def add_suggested_channel(form):
 
 
 def add_bug(form):
+    """
+    Метод для добавления в базу информации о баге
+    """
     if form:
         username = form.get('username')
         information = form.get('information')
@@ -105,3 +130,18 @@ def add_bug(form):
             return {'status': 'ok'}
         return {'status': 'Empty required fields'}
     return {'status': 'Empty form'}
+
+
+def send_channel_photo(channel_id):
+    """
+    Метод для отправки фото запрашиваемого канала
+    """
+    with session_scope() as session:
+        data = session.query(Channels).filter(Channels.id == channel_id).first()
+        if data and data.photo:
+            return send_file(
+                BytesIO(data.photo),
+                mimetype='image/jpeg',
+                as_attachment=True,
+                attachment_filename='photo.jpg')
+    return {'status': 'No photo'}

@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from app.controllers.node_controller import get_last_finished, get_announced_streams, get_current_streams, \
-    add_suggested_channel, add_bug
+    add_suggested_channel, add_bug, send_channel_photo
 
 
 node = Blueprint('node', __name__)
@@ -34,3 +34,8 @@ def api_suggest_channel():
 @node.route('/api/addBug', methods=['POST'])
 def api_add_bug():
     return add_bug(request.json)
+
+
+@node.route('/api/photo/<string:channel_id>', methods=['GET'])
+def api_channel_photo(channel_id):
+    return send_channel_photo(channel_id)
