@@ -5,19 +5,17 @@ from io import BytesIO
 from datetime import datetime
 from dateutil import tz
 
-# from dbhelper import session_scope
-# from models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams
-#
-# from redishelper import redis_con
+from db import session_scope
 
-from app.views.extensions.models import session_scope, Channels, AnnouncedStreams, CurrentStreams, FinishedStreams,\
-    redis_con
+from redishelper import redis_con
+
+from models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams
 
 import os
 
 # Для отладки
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 from_zone = tz.gettz('UTC')
 to_zone = tz.tzlocal()
@@ -287,8 +285,8 @@ async def handler(update):
 
 
 client.add_event_handler(handler)
-# client.start()
-# client.run_until_disconnected()
+client.start()
+client.run_until_disconnected()
 
 # async def main():
 #     photo = BytesIO()

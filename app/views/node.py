@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from .node_logic import get_last_finished, get_announced_streams, get_current_streams, \
+from app.controllers.node_controller import get_last_finished, get_announced_streams, get_current_streams, \
     add_suggested_channel, add_bug
 
 

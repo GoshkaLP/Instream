@@ -1,0 +1,12 @@
+FROM python:3.8.6-buster
+
+WORKDIR /usr/src/app
+
+ADD requirements_app.txt ./requirements.txt
+
+RUN pip install -r requirements.txt
+
+COPY ./ /usr/src/app/
+RUN rm -rf ./tg_bot
+
+CMD ["uwsgi", "app.ini"]

@@ -1,15 +1,7 @@
 # Создание объекта приложения
 from flask import Flask
 
-from app.views import node
-
-from app.views.extensions.tg_module import client
-
-# from .views.models import db
-#
-# from .views.tasks import scheduler
-#
-# from .views.extensions.protection_ext import mail
+from app.views.node import node
 
 
 def create_app(app_config=None):

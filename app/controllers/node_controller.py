@@ -1,6 +1,7 @@
-from app.views.extensions.models.models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams, \
+from app.models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams, \
     SuggestedChannels, Bugs
-from app.views.extensions.models.dbhelper import session_scope
+
+from db import session_scope
 
 from sqlalchemy import desc
 

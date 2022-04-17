@@ -1,4 +1,3 @@
-from sqlalchemy import update, delete
 from sqlalchemy.orm import sessionmaker
 
 from contextlib import contextmanager
@@ -8,8 +7,8 @@ from sqlalchemy import create_engine
 
 
 # Для отладки
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 
 # Конфиг с информацией об IP адресе сервера, на котором работает проект с созданием подключения к PSQL базе данных

@@ -2,8 +2,8 @@ import redis
 import os
 
 # Для отладки
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 REDIS_HOST = os.getenv('HOST')
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')

@@ -29,6 +29,37 @@ services:
     networks:
       - project3
 
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile_app
+    container_name: instream_back
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - 8087
+    depends_on:
+      - db
+      - redis
+      - tg_app
+    networks:
+      - project3
+
+  tg_app:
+    build:
+      context: .
+      dockerfile: Dockerfile_tg
+    container_name: tg_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - project3
+
 
 networks:
   project3:
