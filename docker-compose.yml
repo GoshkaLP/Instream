@@ -29,7 +29,7 @@ services:
     networks:
       - project3
 
-  flask_app:
+  instream_back:
     build:
       context: .
       dockerfile: Dockerfile_app
@@ -38,7 +38,7 @@ services:
     env_file:
       - .env
     expose:
-      - 8087
+      - "8087"
     depends_on:
       - db
       - redis
