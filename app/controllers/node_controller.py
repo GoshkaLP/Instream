@@ -1,15 +1,17 @@
 from app.models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams, \
     SuggestedChannels, Bugs
 
-from db import session_scope
+from db import session_scope, redis_con
 
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 
 from io import BytesIO
 
 from flask import send_file
 
 from os import getenv
+
+from datetime import datetime
 
 # Для отладки
 # from dotenv import load_dotenv
@@ -18,15 +20,17 @@ from os import getenv
 
 def get_last_finished():
     """
-    Метод для получения последних 5ти завершенных трансляций
+    Метод для получения завершенных трансляций в текущий день
     """
+    current_date = datetime.utcnow().date()
     with session_scope() as session:
         data = session.query(FinishedStreams, Channels).\
-            filter(FinishedStreams.channel_id == Channels.id).\
-            order_by(desc(FinishedStreams.end_date)).limit(5).all()
+            filter(FinishedStreams.channel_id == Channels.id,
+                   func.date(FinishedStreams.end_date) == current_date).\
+            order_by(desc(FinishedStreams.end_date)).all()
         resp_data = []
         for element in data:
-            stream, channel = element[0], element[1]
+            stream, channel = element
             resp_data.append({
                 'streamId': stream.id,
                 'channelId': stream.channel_id,
@@ -54,7 +58,7 @@ def get_announced_streams():
             filter(AnnouncedStreams.channel_id == Channels.id).all()
         resp_data = []
         for element in data:
-            stream, channel = element[0], element[1]
+            stream, channel = element
             resp_data.append({
                 'streamId': stream.id,
                 'channelId': stream.channel_id,
@@ -69,6 +73,15 @@ def get_announced_streams():
         }
 
 
+def get_current_viewers(stream_id):
+    """
+    Метод для получения текущего числа зрителей начатого стрима из Redis
+    """
+    key = 'stream:{}'.format(stream_id)
+    if redis_con.hgetall(key):
+        return int(redis_con.hget(key, 'current_viewers'))
+
+
 def get_current_streams():
     """
     Метод для получения текущих трансляций
@@ -78,7 +91,7 @@ def get_current_streams():
             filter(CurrentStreams.channel_id == Channels.id).all()
         resp_data = []
         for element in data:
-            stream, channel = element[0], element[1]
+            stream, channel = element
             resp_data.append({
                 'streamId': stream.id,
                 'channelId': stream.channel_id,
@@ -87,7 +100,8 @@ def get_current_streams():
                 'followersCount': channel.subscribers,
                 'image': 'https://{}/api/photo/{}'.format(getenv('DOMAIN'), stream.channel_id),
                 'startDate': stream.start_date,
-                'scheduled': stream.scheduled
+                'scheduled': stream.scheduled,
+                'viewersCount': get_current_viewers(stream.id)
             })
         return {
             'currentStreams': resp_data

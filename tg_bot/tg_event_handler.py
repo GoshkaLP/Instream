@@ -5,9 +5,7 @@ from io import BytesIO
 from datetime import datetime
 from dateutil import tz
 
-from db import session_scope
-
-from redishelper import redis_con
+from db import session_scope, redis_con
 
 from models import Channels, AnnouncedStreams, CurrentStreams, FinishedStreams
 
@@ -18,13 +16,6 @@ import os
 # load_dotenv()
 
 from_zone = tz.gettz('UTC')
-to_zone = tz.tzlocal()
-
-
-def convert_to_local_time(utc_date):
-    # utc = datetime(*utc_date, tzinfo=from_zone)
-    local_time = utc_date.astimezone(to_zone)
-    return local_time.strftime('%d-%m-%y %H:%M')
 
 
 api_id = int(os.getenv('TG_API_ID'))
